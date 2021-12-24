@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QDialog</class>
+ <widget class="QDialog" name="QDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1202</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QWidget" name="widget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1200</width>
+     <height>800</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>1200</width>
+     <height>800</height>
+    </size>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color:rgb(203, 255, 251)</string>
+   </property>
+   <widget class="QListWidget" name="toreturlist">
+    <property name="geometry">
+     <rect>
+      <x>800</x>
+      <y>140</y>
+      <width>401</width>
+      <height>661</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(179, 190, 253);
+border-left: 2px solid black;
+border-right: 2px solid black;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="endbutton">
+    <property name="geometry">
+     <rect>
+      <x>800</x>
+      <y>0</y>
+      <width>401</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#endbutton{
+border: 2px solid black;
+font: 30pt &quot;Neogrey&quot;;
+background-color: rgb(255, 210, 170);
+}
+QPushButton:hover#endbutton
+{
+background-color:red;
+}
+
+</string>
+    </property>
+    <property name="text">
+     <string>Konec</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="timer">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>401</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color:rgb(201, 224, 253);
+border: 2px solid black;
+font: 30pt &quot;Neogrey&quot;;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="avitable">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>140</y>
+      <width>401</width>
+      <height>661</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(223, 249, 253);
+border-left: 2px solid black;
+border-right: 2px solid black;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="currentlyrented_2">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>60</y>
+      <width>401</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid black;
+font: 28pt &quot;Neogrey&quot;;
+background-color: rgb(201, 224, 253);
+
+
+
+</string>
+    </property>
+    <property name="text">
+     <string>Pronajato</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="toreturn">
+    <property name="geometry">
+     <rect>
+      <x>800</x>
+      <y>60</y>
+      <width>401</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid black;
+font: 28pt &quot;Neogrey&quot;;
+background-color: rgb(179, 190, 253);
+
+
+
+</string>
+    </property>
+    <property name="text">
+     <string>Na vrácení</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="currentlyrentedlist">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>140</y>
+      <width>401</width>
+      <height>661</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(201, 224, 253);
+border-left: 2px solid black;
+border-right: 2px solid black;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="addbutton">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>60</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#addbutton{
+border: 2px solid black;
+font: 20pt &quot;Neogrey&quot;;
+background-color:rgb(203, 255, 251);
+}
+QPushButton:hover#addbutton
+{
+background-color:rgb(85, 170, 255);
+}
+
+</string>
+    </property>
+    <property name="text">
+     <string>Přidat</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="fixedbutton">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>100</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#fixedbutton{
+border: 2px solid black;
+font: 20pt &quot;Neogrey&quot;;
+background-color:rgb(203, 255, 251);
+}
+QPushButton:hover#fixedbutton
+{
+background-color:rgb(85, 170, 255);
+}
+
+
+</string>
+    </property>
+    <property name="text">
+     <string>V pořádku</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="defectivebutton">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>100</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#defectivebutton{
+border: 2px solid black;
+font: 20pt &quot;Neogrey&quot;;
+background-color:rgb(203, 255, 251);
+}
+QPushButton:hover#defectivebutton
+{
+background-color:rgb(85, 170, 255);
+}
+
+
+</string>
+    </property>
+    <property name="text">
+     <string>Nefunkční</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="removebutton">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>60</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#removebutton{
+border: 2px solid black;
+font: 20pt &quot;Neogrey&quot;;
+background-color:rgb(203, 255, 251);
+}
+QPushButton:hover#removebutton
+{
+background-color:rgb(85, 170, 255);
+}
+
+</string>
+    </property>
+    <property name="text">
+     <string>Odebrat</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="cashamount">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>0</y>
+      <width>401</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color:rgb(201, 224, 253);
+border: 2px solid black;
+font: 26pt &quot;Neogrey&quot;;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
