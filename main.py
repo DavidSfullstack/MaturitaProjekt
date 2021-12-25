@@ -49,7 +49,7 @@ class MainScreen(QDialog):
         self.endbutton.clicked.connect(self.exitApp)
         self.available.setItemAlignment(QtCore.Qt.AlignCenter)
         self.removebutton.clicked.connect(self.removeCart)
-        # self.updateavailable()
+        #self.updateavailable()
 
     def displayCashAmount(self):
         MainScreen.currentcash = 7000
@@ -69,7 +69,7 @@ class MainScreen(QDialog):
                 print("Already exists")
             else:
                 where = bisect(Login.availablelist, int(cartnum))
-                Login.availablelist.insert(0, where)
+                Login.availablelist.insert(where, int(cartnum))
                 self.updateavailable()
 
     def updateavailable(self):
