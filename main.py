@@ -115,8 +115,8 @@ class MainScreen(QDialog):
             customwidget.setLayout(widgetLayout)
             cartwidget.setSizeHint(customwidget.sizeHint())
 
-        self.available.insertItem(i, cartwidget)
-        self.available.setItemWidget(cartwidget, customwidget)
+            self.available.insertItem(i, cartwidget)
+            self.available.setItemWidget(cartwidget, customwidget)
 
     def borrowCart(self):
         self.available.takeItem(MainScreen.pos)
