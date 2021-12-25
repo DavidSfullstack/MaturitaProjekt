@@ -1,6 +1,7 @@
 import sys
 
 from datetime import date
+from bisect import bisect
 
 from PyQt5.QtCore import QTimer, QTime
 from PyQt5.QtGui import QFont
@@ -22,14 +23,21 @@ class Login(QDialog):
             self.errormsg.setText("Vyplňte platné údaje")
         else:
             self.gotomainscreen()
+            self.createLists()
 
     def gotomainscreen(self):
         mainscreen = MainScreen()
         widget.addWidget(mainscreen)
         widget.setCurrentIndex(widget.currentIndex() + 1)
 
+    def createLists(self):
+        Login.availablelist = [1, 4, 6, 8, 11, 14]
+        Login.currentlyrentedlist = []
+        Login.toreturnlist = []
+
 
 class MainScreen(QDialog):
+
     def __init__(self):
         super(MainScreen, self).__init__()
         loadUi("mainscreen.ui", self)
@@ -39,8 +47,9 @@ class MainScreen(QDialog):
         timer.start(1000)
         self.addbutton.clicked.connect(self.addCart)
         self.endbutton.clicked.connect(self.exitApp)
-        self.avitable.setItemAlignment(QtCore.Qt.AlignCenter)
+        self.available.setItemAlignment(QtCore.Qt.AlignCenter)
         self.removebutton.clicked.connect(self.removeCart)
+        # self.updateavailable()
 
     def displayCashAmount(self):
         MainScreen.currentcash = 7000
@@ -54,39 +63,49 @@ class MainScreen(QDialog):
 
     def addCart(self):
         cartnum, ok = QInputDialog.getText(self, "Přidat motokáru", "Zadejte číslo motokáry")
-        MainScreen.pos = int(cartnum) - 1
+
         if ok:
+            if int(cartnum) in Login.availablelist:
+                print("Already exists")
+            else:
+                where = bisect(Login.availablelist, int(cartnum))
+                Login.availablelist.insert(0, where)
+                self.updateavailable()
+
+    def updateavailable(self):
+        for i in range(len(Login.availablelist)):
+
             cartwidget = QtWidgets.QListWidgetItem()
 
             customwidget = QtWidgets.QWidget()
-            widgetButton = QtWidgets.QPushButton("Půjčit motokáru " + cartnum)
-            widgetButton.setAccessibleName(str(MainScreen.pos))
+            widgetButton = QtWidgets.QPushButton("Půjčit motokáru " + str(Login.availablelist[i]))
+            widgetButton.setAccessibleName(str(Login.availablelist[i]))
             widgetButton.clicked.connect(self.borrowCart)
             widgetButton.setFixedWidth(375)
             widgetButton.setFixedHeight(41)
             widgetButton.setStyleSheet(
-                                       "QPushButton"
-                                       "{"
-                                       "color: black;"
-                                       "background-color: #DFF9FD;"
-                                       "border-style: solid;"
-                                       "border-width: 2px;"
-                                       "border-color: #000000"
-                                       "}"
-                                       "QPushButton::hover"
-                                       "{"
-                                       "background-color : #B3BEFD;"
-                                       "}"
-                                       )
+                "QPushButton"
+                "{"
+                "color: black;"
+                "background-color: #DFF9FD;"
+                "border-style: solid;"
+                "border-width: 2px;"
+                "border-color: #000000"
+                "}"
+                "QPushButton::hover"
+                "{"
+                "background-color : #B3BEFD;"
+                "}"
+            )
             widgetButton.setFont(QFont('Times', 15))
 
             customwidget.setStyleSheet(
-                                       "color: black;"
-                                       "background-color: #DFF9FD;"
-                                       "border-style: solid;"
-                                       "border-width: 3px;"
-                                       "border-color: #000000"
-                                       )
+                "color: black;"
+                "background-color: #DFF9FD;"
+                "border-style: solid;"
+                "border-width: 3px;"
+                "border-color: #000000"
+            )
             widgetLayout = QtWidgets.QHBoxLayout()
             widgetLayout.addStretch()
             widgetLayout.addWidget(widgetButton)
@@ -96,21 +115,19 @@ class MainScreen(QDialog):
             customwidget.setLayout(widgetLayout)
             cartwidget.setSizeHint(customwidget.sizeHint())
 
-            self.avitable.insertItem(MainScreen.pos, cartwidget)
-            self.avitable.setItemWidget(cartwidget, customwidget)
+        self.available.insertItem(i, cartwidget)
+        self.available.setItemWidget(cartwidget, customwidget)
 
     def borrowCart(self):
-        self.avitable.takeItem(MainScreen.pos)
-
+        self.available.takeItem(MainScreen.pos)
 
     def removeCart(self):
         whichcart, ok = QInputDialog.getText(self, "Odebrat motokáru", "Zadejte číslo motokáry")
         if ok:
-            self.avitable.takeItem(int(whichcart)-1)
+            self.available.takeItem(int(whichcart) - 1)
 
-    #def martAsDefective:
-    #def markAsUsable:
-
+    # def markAsDefective:
+    # def markAsUsable:
 
     def exitApp(self):
         cashamountstart = str(Login.money)
