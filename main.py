@@ -1,33 +1,38 @@
 import sys
+import os
 
 from datetime import datetime
 from bisect import bisect
+
+import sqlite3
 
 from PyQt5.QtCore import QTimer, QTime
 from PyQt5.QtGui import QFont
 from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QStackedWidget, QInputDialog, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QStackedWidget, QInputDialog, QHBoxLayout, QPushButton, \
+    QLineEdit, QMessageBox
 
 
 class Login(QDialog):
     def __init__(self):
         super(Login, self).__init__()
         loadUi("login.ui", self)
-        self.loginbutton.clicked.connect(self.loginfunction)
+        self.loginbutton.clicked.connect(self.loginFunction)
 
-    def loginfunction(self):
+    def loginFunction(self):
         Login.user = self.name.text()
         Login.money = int(self.cash.text())
         if len(Login.user) == 0 or len(str(Login.money)) == 0 or any([char.isdigit() for char in Login.user]):
             self.errormsg.setText("Vyplňte platné údaje")
         else:
-            self.gotomainscreen()
+            self.createDatabase()
             self.createLists()
+            self.gotomainscreen()
 
             cashamountstart = str(Login.money)
             today = datetime.today().strftime('%d-%m-%Y')
-            logfile = open("záznam", "a")
+            logfile = open("záznam.txt", "a")
             logfile.write(
                 "\nDatum: " + today + "\nKasa začátek: " + cashamountstart + "Kč")
             logfile.close()
@@ -37,8 +42,37 @@ class Login(QDialog):
         widget.addWidget(mainscreen)
         widget.setCurrentIndex(widget.currentIndex() + 1)
 
+    def createDatabase(self):
+        if not os.path.exists("cartdata.db"):
+            conn = sqlite3.connect('cartdata.db')
+            c = conn.cursor()
+            c.execute("""CREATE TABLE carts (
+                    cartnumber integer,
+                    condition integer
+                    )""")
+            conn.commit()
+            conn.close()
+        if not os.path.exists("currvalues.db"):
+            conn1 = sqlite3.connect('currvalues.db')
+            c1 = conn1.cursor()
+            c1.execute("""CREATE TABLE lastvalue(
+                           price integer,
+                          duration integer,
+                          password text
+                            )""")
+            conn1.commit()
+            c1.execute("""INSERT INTO lastvalue (price,duration,password) VALUES (30,30,'admin')""")
+            conn1.commit()
+            conn1.close()
+
     def createLists(self):
-        Login.availablelist = [[1, 0], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [7, 1], [8, 1], [9, 1], [10, 1], [11, 1]]
+        conn = sqlite3.connect("cartdata.db")
+        c = conn.cursor()
+        c.execute("SELECT * FROM carts ORDER BY cartnumber")
+        result = c.fetchall()
+        Login.availablelist = []
+        for i in range(len(result)):
+            Login.availablelist.append([result[i][0], result[i][1]])
         Login.currentlyrentedlist = []
         Login.toreturnlist = []
 
@@ -57,6 +91,9 @@ class MainScreen(QDialog):
         updatetimer = QTimer(self)
         updatetimer.setSingleShot(True)
         updatetimer.timeout.connect(self.updateAvailable)
+        updatetimer.timeout.connect(self.getValues)
+        updatetimer.timeout.connect(self.displayCurrentValues)
+
         updatetimer.start(1000)
 
         returntimer = QTimer(self)
@@ -69,8 +106,31 @@ class MainScreen(QDialog):
         self.removebutton.clicked.connect(self.removeCart)
         self.defectivebutton.clicked.connect(self.markAsDefective)
         self.fixedbutton.clicked.connect(self.markAsUsable)
+        self.pricebutton.clicked.connect(self.changePrice)
+        self.timebutton.clicked.connect(self.changeDuration)
+        self.swapbutton.clicked.connect(self.swapCarts)
+        self.passwordbutton.clicked.connect(self.changePassword)
 
-        MainScreen.price = 30
+    def getValues(self):
+        conn1 = sqlite3.connect('currvalues.db')
+        c1 = conn1.cursor()
+
+        c1.execute("SELECT price FROM lastvalue")
+        MainScreen.price = c1.fetchall()[0][0]
+
+        c1.execute("SELECT duration FROM lastvalue")
+        MainScreen.duration = c1.fetchall()[0][0]
+
+        c1.execute("SELECT password FROM lastvalue")
+        MainScreen.password = c1.fetchall()[0][0]
+        conn1.close()
+
+    def displayCurrentValues(self):
+        self.currentduration.setText("Trvání: " + str(MainScreen.duration) + " min")
+        self.currentduration.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.currentprice.setText("Cena: " + str(MainScreen.price) + "Kč")
+        self.currentprice.setAlignment(QtCore.Qt.AlignCenter)
 
     def displayCashAmount(self):
         self.cashamount.setText("Stav kasy: " + str(Login.money))
@@ -82,17 +142,48 @@ class MainScreen(QDialog):
         self.timer.setText(displaytime)
 
     def addCart(self):
-        cartnum, ok = QInputDialog.getText(self, "Přidat motokáru", "Zadejte číslo motokáry")
+        checkrights, ok = QInputDialog.getText(self, "Přidat motokáru", "Zadejte heslo:", QLineEdit.Password)
+        if ok and checkrights == MainScreen.password:
+            cartnum, ok = QInputDialog.getInt(self, "Přidat motokáru", "Zadejte číslo motokáry")
 
-        if ok:
-            if int(cartnum) in Login.availablelist:
-                print("Already exists")
-            else:
-                where = bisect(Login.availablelist, int(cartnum))
-                Login.availablelist.insert(where, int(cartnum))
-                self.updateAvailable()
+            if ok:
+                templist = [i[0] for i in Login.availablelist]
+                templist1 = [i[0] for i in Login.currentlyrentedlist]
+                if cartnum in templist or templist1 or Login.toreturnlist:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Motokára s tímto číslem již existuje")
+                    msg.setWindowTitle("Duplikát")
+                    msg.exec_()
+                else:
+                    where = bisect(templist, cartnum)
+                    Login.availablelist.insert(where, [cartnum, 1])
+
+                    conn = sqlite3.connect("cartdata.db")
+                    c = conn.cursor()
+                    c.execute("""INSERT INTO carts (cartnumber, condition)
+                        VALUES (?, ?) 
+                        """, (cartnum, 1))
+                    conn.commit()
+
+                    c.execute("SELECT * FROM carts ORDER BY cartnumber")
+
+                    result = c.fetchall()
+
+                    conn.close()
+
+                    self.updateAvailable()
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Nesprávné heslo")
+            msg.setInformativeText("Zkuste to znovu.")
+            msg.setWindowTitle("Nesprávné heslo.")
+            msg.exec_()
 
     def updateAvailable(self):
+        if not Login.availablelist:
+            self.available.clear()
         self.available.clear()
         for i in range(len(Login.availablelist)):
             if Login.availablelist[i][1] == 1:
@@ -179,10 +270,10 @@ class MainScreen(QDialog):
                 self.available.setItemWidget(cartwidget, customwidget)
 
     def borrowCart(self):
-        Login.money = Login.money + 30
+        Login.money = Login.money + MainScreen.price
 
         timenow = datetime.now()
-        timetoreturn = (timenow.hour * 60) + timenow.minute + 1
+        timetoreturn = (timenow.hour * 60) + timenow.minute + MainScreen.duration
 
         rentclicked = self.sender()
         rentedcart = int(rentclicked.accessibleName())
@@ -266,7 +357,7 @@ class MainScreen(QDialog):
             self.currentlyrented.setItemWidget(cartwidget, customwidget)
 
     def cancelRent(self):
-        Login.money = Login.money - 30
+        Login.money = Login.money - MainScreen.price
         self.displayCashAmount()
 
         cancelclicked = self.sender()
@@ -299,9 +390,36 @@ class MainScreen(QDialog):
         self.updateAvailable()
 
     def removeCart(self):
-        whichcart, ok = QInputDialog.getText(self, "Odebrat motokáru", "Zadejte číslo motokáry")
-        if ok:
-            self.available.takeItem(int(whichcart) - 1)
+        checkrights, ok = QInputDialog.getText(self, "Odebrat motokáru", "Zadejte heslo:", QLineEdit.Password)
+        if ok and checkrights == MainScreen.password:
+            whichcart, ok = QInputDialog.getInt(self, "Odebrat motokáru", "Zadejte číslo motokáry")
+            if ok:
+                templist = [i[0] for i in Login.availablelist]
+                if whichcart not in templist:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Ujistěte se, že je v prvním sloupci.")
+                    msg.setWindowTitle("Motokára nenalezena.")
+                    msg.exec_()
+                else:
+                    index = templist.index(whichcart)
+                    del Login.availablelist[index]
+
+                    conn = sqlite3.connect("cartdata.db")
+                    c = conn.cursor()
+                    query = ("DELETE FROM carts WHERE cartnumber=?")
+                    c.execute(query, (whichcart,))
+                    conn.commit()
+                    conn.close()
+
+                    self.updateAvailable()
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Nesprávné heslo")
+            msg.setInformativeText("Zkuste to znovu.")
+            msg.setWindowTitle("Nesprávné heslo.")
+            msg.exec_()
 
     def markAsDefective(self):
         cartnum, ok = QInputDialog.getText(self, "Označit nefunkční", "Zadejte číslo motokáry")
@@ -310,6 +428,14 @@ class MainScreen(QDialog):
             if int(cartnum) in templist:
                 indextochange = templist.index(int(cartnum))
                 Login.availablelist[indextochange][1] = 0
+
+                conn = sqlite3.connect("cartdata.db")
+                c = conn.cursor()
+                query = ("UPDATE carts SET condition=0 WHERE cartnumber=?")
+                c.execute(query, (cartnum,))
+                conn.commit()
+                conn.close()
+
                 self.updateAvailable()
 
     def markAsUsable(self):
@@ -319,6 +445,14 @@ class MainScreen(QDialog):
             if int(cartnum) in templist:
                 indextochange = templist.index(int(cartnum))
                 Login.availablelist[indextochange][1] = 1
+
+                conn = sqlite3.connect("cartdata.db")
+                c = conn.cursor()
+                query = ("UPDATE carts SET condition=1 WHERE cartnumber=?")
+                c.execute(query, (cartnum,))
+                conn.commit()
+                conn.close()
+
                 self.updateAvailable()
 
     def checkIfToReturn(self):
@@ -401,14 +535,193 @@ class MainScreen(QDialog):
         self.updateAvailable()
 
     def exitApp(self):
-
         cashamountend = str(Login.money)
-        logfile = open("Záznam", "a")
+        logfile = open("záznam.txt", "a")
         logfile.write(
             "\nKasa konec: " + cashamountend + "Kč\nJméno: " + Login.user + "\n ")
         logfile.close()
-
         app.quit()
+
+    def changePrice(self):
+        checkrights, ok = QInputDialog.getText(self, "Změnit cenu", "Zadejte heslo:", QLineEdit.Password)
+        if ok and checkrights == MainScreen.password:
+            newprice, ok = QInputDialog.getInt(self, "Změnit cenu", "Nová cena:")
+            if ok:
+                conn1 = sqlite3.connect("currvalues.db")
+                c1 = conn1.cursor()
+                query = ("UPDATE lastvalue SET price=?")
+                c1.execute(query, (newprice,))
+                conn1.commit()
+                conn1.close()
+
+                MainScreen.price = newprice
+                self.displayCurrentValues()
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Nesprávné heslo")
+            msg.setInformativeText("Zkuste to znovu.")
+            msg.setWindowTitle("Nesprávné heslo.")
+            msg.exec_()
+
+    def changeDuration(self):
+        checkrights, ok = QInputDialog.getText(self, "Změnit trvání", "Zadejte heslo:", QLineEdit.Password)
+        if ok and checkrights == MainScreen.password:
+            time, ok = QInputDialog.getInt(self, "Změnit trvání", "Nová doba v min:")
+            if ok:
+                conn1 = sqlite3.connect("currvalues.db")
+                c1 = conn1.cursor()
+                query = ("UPDATE lastvalue SET duration=?")
+                c1.execute(query, (time,))
+                conn1.commit()
+                conn1.close()
+
+                MainScreen.duration = time
+                self.displayCurrentValues()
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Nesprávné heslo")
+            msg.setInformativeText("Zkuste to znovu.")
+            msg.setWindowTitle("Nesprávné heslo.")
+            msg.exec_()
+
+    def swapCarts(self):
+        cart1, ok = QInputDialog.getInt(self, "Prohodit motokáry", "První motokára:")
+
+        if ok:
+            cart2, ok = QInputDialog.getInt(self, "Prohodit motokáry", "Druhá motokára:")
+            if ok:
+                if cart1 and cart2 in [i[0] for i in Login.availablelist]:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Obě motokáry by měly být k dispozici.")
+                    msg.setWindowTitle("Není důvod prohazovat.")
+                    msg.exec_()
+
+                if cart1 and cart2 in Login.toreturnlist:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Obě motokáry by teď měly být vráceny.")
+                    msg.setWindowTitle("Není důvod prohazovat.")
+                    msg.exec_()
+
+                if cart1 in [i[0] for i in Login.availablelist] and cart2 in Login.toreturnlist:
+                    templist = [i[0] for i in Login.availablelist]
+                    whereto = bisect(templist, cart2)
+                    Login.availablelist.insert(whereto, [cart2, 1])
+
+                    indextocancel = Login.toreturnlist.index(cart2)
+                    del Login.toreturnlist[indextocancel]
+
+                    self.updateToReturn()
+                    self.updateAvailable()
+
+                if cart1 in Login.toreturnlist and cart2 in [i[0] for i in Login.availablelist]:
+                    templist = [i[0] for i in Login.availablelist]
+                    whereto = bisect(templist, cart1)
+                    Login.availablelist.insert(whereto, [cart1, 1])
+
+                    indextocancel = Login.toreturnlist.index(cart1)
+                    del Login.toreturnlist[indextocancel]
+
+                    self.updateToReturn()
+                    self.updateAvailable()
+
+                if cart1 in [i[0] for i in Login.availablelist] and cart2 in [i[0] for i in Login.currentlyrentedlist]:
+                    index = [i[0] for i in Login.availablelist].index(cart1)
+                    del Login.availablelist[index]
+
+                    whereto = bisect([i[0] for i in Login.availablelist], cart2)
+                    Login.availablelist.insert(whereto, [cart2, 1])
+
+                    templist1 = [i[0] for i in Login.currentlyrentedlist]
+                    index1 = templist1.index(cart2)
+                    Login.currentlyrentedlist[index1][0] = cart1
+
+                    self.updateAvailable()
+                    self.updateRented()
+
+                if cart1 in [i[0] for i in Login.currentlyrentedlist] and cart2 in [i[0] for i in Login.availablelist]:
+                    index = [i[0] for i in Login.availablelist].index(cart2)
+                    del Login.availablelist[index]
+
+                    whereto = bisect([i[0] for i in Login.availablelist], cart1)
+                    Login.availablelist.insert(whereto, [cart1, 1])
+
+                    templist1 = [i[0] for i in Login.currentlyrentedlist]
+                    index1 = templist1.index(cart1)
+                    Login.currentlyrentedlist[index1][0] = cart2
+
+                    self.updateAvailable()
+                    self.updateRented()
+
+                if cart1 in [i[0] for i in Login.currentlyrentedlist] and cart2 in Login.toreturnlist:
+                    Login.toreturnlist.remove(cart2)
+
+                    whereto = bisect([i[0] for i in Login.availablelist], cart1)
+                    Login.availablelist.insert(whereto, [cart1, 1])
+
+                    templist1 = [i[0] for i in Login.currentlyrentedlist]
+                    index1 = templist1.index(cart1)
+                    Login.currentlyrentedlist[index1][0] = cart2
+
+                    self.updateAvailable()
+                    self.updateToReturn()
+                    self.updateRented()
+
+                if cart1 in Login.toreturnlist and cart2 in [i[0] for i in Login.currentlyrentedlist]:
+                    Login.toreturnlist.remove(cart1)
+
+                    whereto = bisect([i[0] for i in Login.availablelist], cart2)
+                    Login.availablelist.insert(whereto, [cart2, 1])
+
+                    templist1 = [i[0] for i in Login.currentlyrentedlist]
+                    index1 = templist1.index(cart2)
+                    Login.currentlyrentedlist[index1][0] = cart1
+
+                    self.updateAvailable()
+                    self.updateToReturn()
+                    self.updateRented()
+
+                if cart1 in [i[0] for i in Login.currentlyrentedlist] and cart2 in [i[0] for i in
+                                                                                    Login.currentlyrentedlist]:
+                    indexx = [i[0] for i in Login.currentlyrentedlist].index(cart1)
+                    indexy = [i[0] for i in Login.currentlyrentedlist].index(cart2)
+                    Login.currentlyrentedlist[indexx][0], Login.currentlyrentedlist[indexy][0] = \
+                        Login.currentlyrentedlist[indexy][0], Login.currentlyrentedlist[indexx][0]
+                    self.updateRented()
+
+    def changePassword(self):
+        checkpass, ok = QInputDialog.getText(self, "Změnit heslo", "Zadejte aktuální heslo:", QLineEdit.Password)
+        if ok and checkpass == MainScreen.password:
+            newpass, ok = QInputDialog.getText(self, "Změnit heslo", "Zadejte nové heslo:")
+            if ok:
+                newpassconf, ok = QInputDialog.getText(self, "Změnit heslo", "Potvrďte nové heslo:")
+                if ok and newpass == newpassconf:
+                    conn1 = sqlite3.connect("currvalues.db")
+                    c1 = conn1.cursor()
+                    query = ("UPDATE lastvalue SET password=?")
+                    c1.execute(query, (newpassconf,))
+                    conn1.commit()
+                    conn1.close()
+
+                    MainScreen.password = newpassconf
+                else:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Hesla se neshodují")
+                    msg.setInformativeText("Zkuste to znovu.")
+                    msg.setWindowTitle("Hesla se neshodují.")
+                    msg.exec_()
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Nesprávné heslo")
+            msg.setInformativeText("Zkuste to znovu.")
+            msg.setWindowTitle("Nesprávné heslo.")
+            msg.exec_()
+
 
 
 # main
@@ -420,7 +733,9 @@ widget.addWidget(LoginScreen)
 widget.setFixedHeight(800)
 widget.setFixedWidth(1200)
 widget.show()
+
 try:
     sys.exit(app.exec_())
 except:
     print("Exiting")
+
