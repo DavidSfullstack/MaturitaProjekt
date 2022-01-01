@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1202</width>
+    <width>1201</width>
     <height>800</height>
    </rect>
   </property>
@@ -31,7 +31,7 @@
    <property name="styleSheet">
     <string notr="true">background-color:rgb(203, 255, 251)</string>
    </property>
-   <widget class="QListWidget" name="toreturlist">
+   <widget class="QListWidget" name="toreturn">
     <property name="geometry">
      <rect>
       <x>800</x>
@@ -49,17 +49,17 @@ border-right: 2px solid black;</string>
    <widget class="QPushButton" name="endbutton">
     <property name="geometry">
      <rect>
-      <x>800</x>
-      <y>0</y>
-      <width>401</width>
-      <height>61</height>
+      <x>1000</x>
+      <y>60</y>
+      <width>201</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton#endbutton{
 border: 2px solid black;
-font: 30pt &quot;Neogrey&quot;;
-background-color: rgb(255, 210, 170);
+font: 16pt &quot;Neogrey&quot;;
+background-color:rgb(203, 255, 251);
 }
 QPushButton:hover#endbutton
 {
@@ -82,7 +82,7 @@ background-color:red;
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color:rgb(201, 224, 253);
+     <string notr="true">background-color:rgb(203, 255, 251);
 border: 2px solid black;
 font: 30pt &quot;Neogrey&quot;;</string>
     </property>
@@ -90,7 +90,7 @@ font: 30pt &quot;Neogrey&quot;;</string>
      <string/>
     </property>
    </widget>
-   <widget class="QListWidget" name="avitable">
+   <widget class="QListWidget" name="available">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -105,18 +105,18 @@ border-left: 2px solid black;
 border-right: 2px solid black;</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="currentlyrented_2">
+   <widget class="QPushButton" name="currentlyrentedlabel">
     <property name="geometry">
      <rect>
       <x>400</x>
-      <y>60</y>
+      <y>100</y>
       <width>401</width>
-      <height>81</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">border: 2px solid black;
-font: 28pt &quot;Neogrey&quot;;
+font: 25pt &quot;Neogrey&quot;;
 background-color: rgb(201, 224, 253);
 
 
@@ -127,13 +127,13 @@ background-color: rgb(201, 224, 253);
      <string>Pronajato</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="toreturn">
+   <widget class="QPushButton" name="toreturnlabel">
     <property name="geometry">
      <rect>
       <x>800</x>
-      <y>60</y>
+      <y>100</y>
       <width>401</width>
-      <height>81</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -149,7 +149,7 @@ background-color: rgb(179, 190, 253);
      <string>Na vrácení</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="currentlyrentedlist">
+   <widget class="QListWidget" name="currentlyrented">
     <property name="geometry">
      <rect>
       <x>400</x>
@@ -280,9 +280,149 @@ background-color:rgb(85, 170, 255);
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color:rgb(201, 224, 253);
+     <string notr="true">background-color:rgb(203, 255, 251);
 border: 2px solid black;
 font: 26pt &quot;Neogrey&quot;;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pricebutton">
+    <property name="geometry">
+     <rect>
+      <x>1000</x>
+      <y>30</y>
+      <width>201</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#pricebutton{
+border: 2px solid black;
+font: 13pt &quot;Neogrey&quot;;
+background-color:rgb(203, 255, 251);
+}
+QPushButton:hover#pricebutton
+{
+background-color:rgb(85, 170, 255);
+}
+
+</string>
+    </property>
+    <property name="text">
+     <string>Změnit cenu</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="timebutton">
+    <property name="geometry">
+     <rect>
+      <x>1000</x>
+      <y>0</y>
+      <width>201</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#timebutton{
+border: 2px solid black;
+font: 13pt &quot;Neogrey&quot;;
+background-color:rgb(203, 255, 251);
+}
+QPushButton:hover#timebutton
+{
+background-color:rgb(85, 170, 255);
+}
+
+</string>
+    </property>
+    <property name="text">
+     <string>Změnit trvání</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="swapbutton">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>60</y>
+      <width>401</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#swapbutton{
+border: 2px solid black;
+font: 21pt &quot;Neogrey&quot;;
+background-color:rgb(203, 255, 251);
+}
+QPushButton:hover#swapbutton
+{
+background-color:rgb(85, 170, 255);
+}
+
+</string>
+    </property>
+    <property name="text">
+     <string>Prohodit motokáry</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="passwordbutton">
+    <property name="geometry">
+     <rect>
+      <x>800</x>
+      <y>60</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#passwordbutton{
+border: 2px solid black;
+font: 13pt &quot;Neogrey&quot;;
+background-color:rgb(203, 255, 251);
+}
+QPushButton:hover#passwordbutton
+{
+background-color:rgb(85, 170, 255);
+}
+
+</string>
+    </property>
+    <property name="text">
+     <string>Změnit heslo</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="currentduration">
+    <property name="geometry">
+     <rect>
+      <x>800</x>
+      <y>0</y>
+      <width>201</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color:rgb(203, 255, 251);
+border: 2px solid black;
+font: 12pt &quot;Neogrey&quot;;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="currentprice">
+    <property name="geometry">
+     <rect>
+      <x>800</x>
+      <y>30</y>
+      <width>201</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color:rgb(203, 255, 251);
+border: 2px solid black;
+font: 12pt &quot;Neogrey&quot;;</string>
     </property>
     <property name="text">
      <string/>
