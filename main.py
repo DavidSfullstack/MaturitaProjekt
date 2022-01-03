@@ -149,7 +149,7 @@ class MainScreen(QDialog):
             if ok:
                 templist = [i[0] for i in Login.availablelist]
                 templist1 = [i[0] for i in Login.currentlyrentedlist]
-                if cartnum in templist or templist1 or Login.toreturnlist:
+                if cartnum in templist or cartnum in templist1 or cartnum in Login.toreturnlist:
                     msg = QMessageBox()
                     msg.setIcon(QMessageBox.Information)
                     msg.setText("Motokára s tímto číslem již existuje")
