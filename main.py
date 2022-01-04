@@ -22,10 +22,12 @@ class Login(QDialog):
 
     def loginFunction(self):
         Login.user = self.name.text()
-        Login.money = int(self.cash.text())
-        if len(Login.user) == 0 or len(str(Login.money)) == 0 or any([char.isdigit() for char in Login.user]):
+        tempcash = self.cash.text()
+
+        if Login.user == "" or len(str(tempcash)) == "" or any([char.isdigit() for char in Login.user]):
             self.errormsg.setText("Vyplňte platné údaje")
         else:
+            Login.money = int(tempcash)
             self.createDatabase()
             self.createLists()
             self.gotomainscreen()
@@ -34,7 +36,7 @@ class Login(QDialog):
             today = datetime.today().strftime('%d-%m-%Y')
             logfile = open("záznam.txt", "a")
             logfile.write(
-                "\nDatum: " + today + "\nKasa začátek: " + cashamountstart + "Kč")
+               "\nDatum: " + today + "\nKasa začátek: " + cashamountstart + "Kč")
             logfile.close()
 
     def gotomainscreen(self):
@@ -592,57 +594,36 @@ class MainScreen(QDialog):
         if ok:
             cart2, ok = QInputDialog.getInt(self, "Prohodit motokáry", "Druhá motokára:")
             if ok:
-                if cart1 and cart2 in [i[0] for i in Login.availablelist]:
+                if cart1 in [i[0] for i in Login.availablelist] and cart2 in [i[0] for i in Login.availablelist]:
                     msg = QMessageBox()
                     msg.setIcon(QMessageBox.Information)
                     msg.setText("Obě motokáry by měly být k dispozici.")
                     msg.setWindowTitle("Není důvod prohazovat.")
                     msg.exec_()
 
-                if cart1 and cart2 in Login.toreturnlist:
+                elif cart1 in Login.toreturnlist and cart2 in Login.toreturnlist:
                     msg = QMessageBox()
                     msg.setIcon(QMessageBox.Information)
                     msg.setText("Obě motokáry by teď měly být vráceny.")
                     msg.setWindowTitle("Není důvod prohazovat.")
                     msg.exec_()
 
-                if cart1 in [i[0] for i in Login.availablelist] and cart2 in Login.toreturnlist:
-                    templist = [i[0] for i in Login.availablelist]
-                    whereto = bisect(templist, cart2)
-                    Login.availablelist.insert(whereto, [cart2, 1])
+                elif cart1 in [i[0] for i in Login.availablelist] and cart2 in Login.toreturnlist:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Motokáry by teď měly být vráceny nebo jsou k dispozici.")
+                    msg.setWindowTitle("Není důvod prohazovat.")
+                    msg.exec_()
 
-                    indextocancel = Login.toreturnlist.index(cart2)
-                    del Login.toreturnlist[indextocancel]
+                elif cart1 in Login.toreturnlist and cart2 in [i[0] for i in Login.availablelist]:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Motokáry by teď měly být vráceny nebo jsou k dispozici.")
+                    msg.setWindowTitle("Není důvod prohazovat.")
+                    msg.exec_()
 
-                    self.updateToReturn()
-                    self.updateAvailable()
-
-                if cart1 in Login.toreturnlist and cart2 in [i[0] for i in Login.availablelist]:
-                    templist = [i[0] for i in Login.availablelist]
-                    whereto = bisect(templist, cart1)
-                    Login.availablelist.insert(whereto, [cart1, 1])
-
-                    indextocancel = Login.toreturnlist.index(cart1)
-                    del Login.toreturnlist[indextocancel]
-
-                    self.updateToReturn()
-                    self.updateAvailable()
-
-                if cart1 in [i[0] for i in Login.availablelist] and cart2 in [i[0] for i in Login.currentlyrentedlist]:
-                    index = [i[0] for i in Login.availablelist].index(cart1)
-                    del Login.availablelist[index]
-
-                    whereto = bisect([i[0] for i in Login.availablelist], cart2)
-                    Login.availablelist.insert(whereto, [cart2, 1])
-
-                    templist1 = [i[0] for i in Login.currentlyrentedlist]
-                    index1 = templist1.index(cart2)
-                    Login.currentlyrentedlist[index1][0] = cart1
-
-                    self.updateAvailable()
-                    self.updateRented()
-
-                if cart1 in [i[0] for i in Login.currentlyrentedlist] and cart2 in [i[0] for i in Login.availablelist]:
+                elif cart1 in [i[0] for i in Login.currentlyrentedlist] and cart2 in [i[0] for i in
+                                                                                      Login.availablelist]:
                     index = [i[0] for i in Login.availablelist].index(cart2)
                     del Login.availablelist[index]
 
@@ -656,11 +637,9 @@ class MainScreen(QDialog):
                     self.updateAvailable()
                     self.updateRented()
 
-                if cart1 in [i[0] for i in Login.currentlyrentedlist] and cart2 in Login.toreturnlist:
-                    Login.toreturnlist.remove(cart2)
-
-                    whereto = bisect([i[0] for i in Login.availablelist], cart1)
-                    Login.availablelist.insert(whereto, [cart1, 1])
+                elif cart1 in [i[0] for i in Login.currentlyrentedlist] and cart2 in Login.toreturnlist:
+                    index = Login.toreturnlist.index(cart2)
+                    Login.toreturnlist[index] = cart1
 
                     templist1 = [i[0] for i in Login.currentlyrentedlist]
                     index1 = templist1.index(cart1)
@@ -670,8 +649,28 @@ class MainScreen(QDialog):
                     self.updateToReturn()
                     self.updateRented()
 
-                if cart1 in Login.toreturnlist and cart2 in [i[0] for i in Login.currentlyrentedlist]:
-                    Login.toreturnlist.remove(cart1)
+                elif cart1 in Login.toreturnlist and cart2 in [i[0] for i in Login.currentlyrentedlist]:
+                    index = Login.toreturnlist.index(cart1)
+                    Login.toreturnlist[index] = cart2
+
+                    templist1 = [i[0] for i in Login.currentlyrentedlist]
+                    index1 = templist1.index(cart2)
+                    Login.currentlyrentedlist[index1][0] = cart1
+
+                    self.updateToReturn()
+                    self.updateRented()
+
+                elif cart1 in [i[0] for i in Login.currentlyrentedlist] and cart2 in [i[0] for i in
+                                                                                      Login.currentlyrentedlist]:
+                    indexx = [i[0] for i in Login.currentlyrentedlist].index(cart1)
+                    indexy = [i[0] for i in Login.currentlyrentedlist].index(cart2)
+                    Login.currentlyrentedlist[indexx][0], Login.currentlyrentedlist[indexy][0] = \
+                        Login.currentlyrentedlist[indexy][0], Login.currentlyrentedlist[indexx][0]
+                    self.updateRented()
+
+                elif cart1 in [i[0] for i in Login.availablelist] and cart2 in [i[0] for i in Login.currentlyrentedlist]:
+                    index = [i[0] for i in Login.availablelist].index(cart1)
+                    del Login.availablelist[index]
 
                     whereto = bisect([i[0] for i in Login.availablelist], cart2)
                     Login.availablelist.insert(whereto, [cart2, 1])
@@ -681,15 +680,6 @@ class MainScreen(QDialog):
                     Login.currentlyrentedlist[index1][0] = cart1
 
                     self.updateAvailable()
-                    self.updateToReturn()
-                    self.updateRented()
-
-                if cart1 in [i[0] for i in Login.currentlyrentedlist] and cart2 in [i[0] for i in
-                                                                                    Login.currentlyrentedlist]:
-                    indexx = [i[0] for i in Login.currentlyrentedlist].index(cart1)
-                    indexy = [i[0] for i in Login.currentlyrentedlist].index(cart2)
-                    Login.currentlyrentedlist[indexx][0], Login.currentlyrentedlist[indexy][0] = \
-                        Login.currentlyrentedlist[indexy][0], Login.currentlyrentedlist[indexx][0]
                     self.updateRented()
 
     def changePassword(self):
@@ -723,7 +713,6 @@ class MainScreen(QDialog):
             msg.exec_()
 
 
-
 # main
 app = QApplication(sys.argv)
 LoginScreen = Login()
@@ -738,4 +727,3 @@ try:
     sys.exit(app.exec_())
 except:
     print("Exiting")
-
