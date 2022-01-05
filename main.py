@@ -24,7 +24,7 @@ class Login(QDialog):
         Login.user = self.name.text()
         tempcash = self.cash.text()
 
-        if Login.user == "" or len(str(tempcash)) == "" or any([char.isdigit() for char in Login.user]):
+        if Login.user == "" or len(tempcash) == "" or any([char.isdigit() for char in Login.user]) or not tempcash.isdecimal():
             self.errormsg.setText("Vyplňte platné údaje")
         else:
             Login.money = int(tempcash)
