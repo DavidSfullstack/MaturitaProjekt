@@ -110,7 +110,7 @@ border-right: 2px solid black;</string>
      <rect>
       <x>400</x>
       <y>100</y>
-      <width>401</width>
+      <width>301</width>
       <height>41</height>
      </rect>
     </property>
@@ -426,6 +426,28 @@ font: 12pt &quot;Neogrey&quot;;</string>
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="currentlyrentedlabel_2">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>100</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid black;
+font: 15pt &quot;Neogrey&quot;;
+background-color: rgb(201, 224, 253);
+
+
+
+</string>
+    </property>
+    <property name="text">
+     <string>Vrátit v:</string>
     </property>
    </widget>
   </widget>

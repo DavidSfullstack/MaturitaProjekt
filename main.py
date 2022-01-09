@@ -24,7 +24,7 @@ class Login(QDialog):
         Login.user = self.name.text()
         tempcash = self.cash.text()
 
-        if Login.user == "" or len(tempcash) == "" or any([char.isdigit() for char in Login.user]) or not tempcash.isdecimal():
+        if Login.user == "" or len(str(tempcash)) == "" or any([char.isdigit() for char in Login.user]):
             self.errormsg.setText("Vyplňte platné údaje")
         else:
             Login.money = int(tempcash)
@@ -259,6 +259,7 @@ class MainScreen(QDialog):
                     "border-width: 3px;"
                     "border-color: #000000"
                 )
+
                 widgetLayout = QtWidgets.QHBoxLayout()
                 widgetLayout.addStretch()
                 widgetLayout.addWidget(widgetText)
@@ -298,7 +299,7 @@ class MainScreen(QDialog):
             widgetButton = QtWidgets.QPushButton("Zrušit číslo " + str(Login.currentlyrentedlist[i][0]))
             widgetButton.setAccessibleName(str(Login.currentlyrentedlist[i][0]))
             widgetButton.clicked.connect(self.cancelRent)
-            widgetButton.setFixedWidth(173)
+            widgetButton.setFixedWidth(138)
             widgetButton.setFixedHeight(41)
             widgetButton.setStyleSheet(
                 "QPushButton"
@@ -319,7 +320,7 @@ class MainScreen(QDialog):
             widgetButton2 = QtWidgets.QPushButton("Vrátit číslo " + str(Login.currentlyrentedlist[i][0]))
             widgetButton2.setAccessibleName(str(Login.currentlyrentedlist[i][0]))
             widgetButton2.clicked.connect(self.returnEarly)
-            widgetButton2.setFixedWidth(173)
+            widgetButton2.setFixedWidth(138)
             widgetButton2.setFixedHeight(41)
             widgetButton2.setStyleSheet(
                 "QPushButton"
@@ -343,12 +344,29 @@ class MainScreen(QDialog):
                 "border-width: 3px;"
                 "border-color: #000000"
             )
+            widgetText = QtWidgets.QLabel(str(Login.currentlyrentedlist[i][1]//60) + ":" + str(Login.currentlyrentedlist[i][1] % 60))
+            widgetText.setFixedWidth(67)
+            widgetText.setFixedHeight(41)
+            widgetText.setStyleSheet(
+                "QLabel"
+                "{"
+                "color: black;"
+                "background-color: #c9e0fd;"
+                "border-style: solid;"
+                "border-width: 2px;"
+                "border-color: #000000"
+                "}"
+            )
+            widgetText.setFont(QFont('Times', 15))
+            widgetText.setAlignment(QtCore.Qt.AlignCenter)
 
             widgetLayout = QtWidgets.QHBoxLayout()
             widgetLayout.addStretch()
             widgetLayout.addWidget(widgetButton)
             widgetLayout.addStretch()
             widgetLayout.addWidget(widgetButton2)
+            widgetLayout.addStretch()
+            widgetLayout.addWidget(widgetText)
             widgetLayout.addStretch()
 
             widgetLayout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
