@@ -344,7 +344,16 @@ class MainScreen(QDialog):
                 "border-width: 3px;"
                 "border-color: #000000"
             )
-            widgetText = QtWidgets.QLabel(str(Login.currentlyrentedlist[i][1]//60) + ":" + str(Login.currentlyrentedlist[i][1] % 60))
+
+            returnhour = Login.currentlyrentedlist[i][1]//60
+            returnminute = Login.currentlyrentedlist[i][1] % 60
+            disreturntime = str(returnhour) + ":"
+            if returnminute < 10:
+                disreturntime = disreturntime + "0" + str(returnminute)
+            else:
+                disreturntime = disreturntime + str(returnminute)
+
+            widgetText = QtWidgets.QLabel(disreturntime)
             widgetText.setFixedWidth(67)
             widgetText.setFixedHeight(41)
             widgetText.setStyleSheet(
