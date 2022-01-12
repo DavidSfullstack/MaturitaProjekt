@@ -24,7 +24,7 @@ class Login(QDialog):
         Login.user = self.name.text()
         tempcash = self.cash.text()
 
-        if Login.user == "" or len(str(tempcash)) == "" or any([char.isdigit() for char in Login.user]):
+        if Login.user == "" or str(tempcash) == "" or any([char.isdigit() for char in Login.user]) or not all([char.isdigit() for char in tempcash]):
             self.errormsg.setText("Vyplňte platné údaje")
         else:
             Login.money = int(tempcash)
@@ -487,6 +487,7 @@ class MainScreen(QDialog):
     def checkIfToReturn(self):
         timenow = datetime.now()
         currenttime = (timenow.hour * 60) + timenow.minute
+
         if not Login.currentlyrentedlist:
             pass
         else:
