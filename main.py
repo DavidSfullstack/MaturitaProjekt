@@ -491,14 +491,26 @@ class MainScreen(QDialog):
         if not Login.currentlyrentedlist:
             pass
         else:
-            if Login.currentlyrentedlist[0][1] == currenttime:
-                Login.toreturnlist.append((Login.currentlyrentedlist[0][0]))
-                del Login.currentlyrentedlist[0]
-                self.updateRented()
-                self.updateToReturn()
-                self.checkIfToReturn()
-            elif Login.currentlyrentedlist[0][1] != currenttime:
-                pass
+            newlist = []
+            for i in Login.currentlyrentedlist:
+                if i[1] != currenttime:
+                    newlist.append(i)
+                elif i[1] == currenttime:
+                    Login.toreturnlist.append(i[0])
+            Login.currentlyrentedlist = newlist
+            self.updateRented()
+            self.updateToReturn()
+
+
+
+        #    if Login.currentlyrentedlist[0][1] == currenttime:
+        #        Login.toreturnlist.append((Login.currentlyrentedlist[0][0]))
+        #        del Login.currentlyrentedlist[0]
+         #       self.updateRented()
+        #        self.updateToReturn()
+        #        self.checkIfToReturn()
+        #elif Login.currentlyrentedlist[0][1] != currenttime:
+         #       pass
 
     def updateToReturn(self):
         if not Login.toreturnlist:
