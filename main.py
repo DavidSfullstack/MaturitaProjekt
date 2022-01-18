@@ -467,6 +467,14 @@ class MainScreen(QDialog):
 
                 self.updateAvailable()
 
+            else:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Ujistěte se, že motokára existuje a je k dispozici")
+                msg.setInformativeText("Zkuste to znovu.")
+                msg.setWindowTitle("Motokára nenalezena.")
+                msg.exec_()
+
     def markAsUsable(self):
         cartnum, ok = QInputDialog.getText(self, "Označit funkční", "Zadejte číslo motokáry")
         if ok:
@@ -484,6 +492,14 @@ class MainScreen(QDialog):
 
                 self.updateAvailable()
 
+            else:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Ujistěte se, že motokára existuje a je k dispozici")
+                msg.setInformativeText("Zkuste to znovu.")
+                msg.setWindowTitle("Motokára nenalezena.")
+                msg.exec_()
+
     def checkIfToReturn(self):
         timenow = datetime.now()
         currenttime = (timenow.hour * 60) + timenow.minute
@@ -491,14 +507,15 @@ class MainScreen(QDialog):
         if not Login.currentlyrentedlist:
             pass
         else:
-            if Login.currentlyrentedlist[0][1] == currenttime:
-                Login.toreturnlist.append((Login.currentlyrentedlist[0][0]))
-                del Login.currentlyrentedlist[0]
-                self.updateRented()
-                self.updateToReturn()
-                self.checkIfToReturn()
-            elif Login.currentlyrentedlist[0][1] != currenttime:
-                pass
+            newlist = []
+            for i in Login.currentlyrentedlist:
+                if i[1] != currenttime:
+                    newlist.append(i)
+                elif i[1] == currenttime:
+                    Login.toreturnlist.append(i[0])
+            Login.currentlyrentedlist = newlist
+            self.updateRented()
+            self.updateToReturn()
 
     def updateToReturn(self):
         if not Login.toreturnlist:
