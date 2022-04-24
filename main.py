@@ -24,7 +24,7 @@ class Login(QDialog):
         Login.user = self.name.text()
         tempcash = self.cash.text()
 
-        if Login.user == "" or len(str(tempcash)) == "" or any([char.isdigit() for char in Login.user]):
+        if Login.user == "" or str(tempcash) == "" or any([char.isdigit() for char in Login.user]) or not all([char.isdigit() for char in tempcash]):
             self.errormsg.setText("Vyplňte platné údaje")
         else:
             Login.money = int(tempcash)
@@ -88,7 +88,7 @@ class MainScreen(QDialog):
         timer = QTimer(self)
         timer.timeout.connect(self.displayTime)
         timer.timeout.connect(self.displayCashAmount)
-        timer.start(1000)
+        timer.start(10)
 
         updatetimer = QTimer(self)
         updatetimer.setSingleShot(True)
@@ -96,7 +96,7 @@ class MainScreen(QDialog):
         updatetimer.timeout.connect(self.getValues)
         updatetimer.timeout.connect(self.displayCurrentValues)
 
-        updatetimer.start(1000)
+        updatetimer.start(10)
 
         returntimer = QTimer(self)
         returntimer.timeout.connect(self.checkIfToReturn)
@@ -112,6 +112,28 @@ class MainScreen(QDialog):
         self.timebutton.clicked.connect(self.changeDuration)
         self.swapbutton.clicked.connect(self.swapCarts)
         self.passwordbutton.clicked.connect(self.changePassword)
+        self.adminloginbutton.clicked.connect(self.allowChange)
+        self.adminlogoutbutton.clicked.connect(self.logOutAdmin)
+
+        MainScreen.adminpower = False
+
+    def allowChange(self):
+        checkrights, ok = QInputDialog.getText(self, "Přidat motokáru", "Zadejte heslo:", QLineEdit.Password)
+        if checkrights and ok:
+            MainScreen.adminpower = True
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Úspěšně přihlášeno, můžete provádět změny")
+            msg.setWindowTitle("Přihlášeno")
+            msg.exec_()
+
+    def logOutAdmin(self):
+        MainScreen.adminpower = False
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Úspěšně odhlášeno")
+        msg.setWindowTitle("Odhlášeno")
+        msg.exec_()
 
     def getValues(self):
         conn1 = sqlite3.connect('currvalues.db')
@@ -144,8 +166,7 @@ class MainScreen(QDialog):
         self.timer.setText(displaytime)
 
     def addCart(self):
-        checkrights, ok = QInputDialog.getText(self, "Přidat motokáru", "Zadejte heslo:", QLineEdit.Password)
-        if ok and checkrights == MainScreen.password:
+        if MainScreen.adminpower:
             cartnum, ok = QInputDialog.getInt(self, "Přidat motokáru", "Zadejte číslo motokáry")
 
             if ok:
@@ -178,9 +199,8 @@ class MainScreen(QDialog):
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
-            msg.setText("Nesprávné heslo")
-            msg.setInformativeText("Zkuste to znovu.")
-            msg.setWindowTitle("Nesprávné heslo.")
+            msg.setText("Před prováděním změn se přihlaste")
+            msg.setWindowTitle("Nedostatečná práva.")
             msg.exec_()
 
     def updateAvailable(self):
@@ -259,6 +279,7 @@ class MainScreen(QDialog):
                     "border-width: 3px;"
                     "border-color: #000000"
                 )
+
                 widgetLayout = QtWidgets.QHBoxLayout()
                 widgetLayout.addStretch()
                 widgetLayout.addWidget(widgetText)
@@ -298,7 +319,7 @@ class MainScreen(QDialog):
             widgetButton = QtWidgets.QPushButton("Zrušit číslo " + str(Login.currentlyrentedlist[i][0]))
             widgetButton.setAccessibleName(str(Login.currentlyrentedlist[i][0]))
             widgetButton.clicked.connect(self.cancelRent)
-            widgetButton.setFixedWidth(173)
+            widgetButton.setFixedWidth(138)
             widgetButton.setFixedHeight(41)
             widgetButton.setStyleSheet(
                 "QPushButton"
@@ -319,7 +340,7 @@ class MainScreen(QDialog):
             widgetButton2 = QtWidgets.QPushButton("Vrátit číslo " + str(Login.currentlyrentedlist[i][0]))
             widgetButton2.setAccessibleName(str(Login.currentlyrentedlist[i][0]))
             widgetButton2.clicked.connect(self.returnEarly)
-            widgetButton2.setFixedWidth(173)
+            widgetButton2.setFixedWidth(138)
             widgetButton2.setFixedHeight(41)
             widgetButton2.setStyleSheet(
                 "QPushButton"
@@ -344,11 +365,37 @@ class MainScreen(QDialog):
                 "border-color: #000000"
             )
 
+            returnhour = Login.currentlyrentedlist[i][1]//60
+            returnminute = Login.currentlyrentedlist[i][1] % 60
+            disreturntime = str(returnhour) + ":"
+            if returnminute < 10:
+                disreturntime = disreturntime + "0" + str(returnminute)
+            else:
+                disreturntime = disreturntime + str(returnminute)
+
+            widgetText = QtWidgets.QLabel(disreturntime)
+            widgetText.setFixedWidth(67)
+            widgetText.setFixedHeight(41)
+            widgetText.setStyleSheet(
+                "QLabel"
+                "{"
+                "color: black;"
+                "background-color: #c9e0fd;"
+                "border-style: solid;"
+                "border-width: 2px;"
+                "border-color: #000000"
+                "}"
+            )
+            widgetText.setFont(QFont('Times', 15))
+            widgetText.setAlignment(QtCore.Qt.AlignCenter)
+
             widgetLayout = QtWidgets.QHBoxLayout()
             widgetLayout.addStretch()
             widgetLayout.addWidget(widgetButton)
             widgetLayout.addStretch()
             widgetLayout.addWidget(widgetButton2)
+            widgetLayout.addStretch()
+            widgetLayout.addWidget(widgetText)
             widgetLayout.addStretch()
 
             widgetLayout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
@@ -392,8 +439,7 @@ class MainScreen(QDialog):
         self.updateAvailable()
 
     def removeCart(self):
-        checkrights, ok = QInputDialog.getText(self, "Odebrat motokáru", "Zadejte heslo:", QLineEdit.Password)
-        if ok and checkrights == MainScreen.password:
+        if MainScreen.adminpower:
             whichcart, ok = QInputDialog.getInt(self, "Odebrat motokáru", "Zadejte číslo motokáry")
             if ok:
                 templist = [i[0] for i in Login.availablelist]
@@ -418,9 +464,8 @@ class MainScreen(QDialog):
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
-            msg.setText("Nesprávné heslo")
-            msg.setInformativeText("Zkuste to znovu.")
-            msg.setWindowTitle("Nesprávné heslo.")
+            msg.setText("Před prováděním změn se přihlaste")
+            msg.setWindowTitle("Nedostatečná práva.")
             msg.exec_()
 
     def markAsDefective(self):
@@ -440,6 +485,14 @@ class MainScreen(QDialog):
 
                 self.updateAvailable()
 
+            else:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Ujistěte se, že motokára existuje a je k dispozici")
+                msg.setInformativeText("Zkuste to znovu.")
+                msg.setWindowTitle("Motokára nenalezena.")
+                msg.exec_()
+
     def markAsUsable(self):
         cartnum, ok = QInputDialog.getText(self, "Označit funkční", "Zadejte číslo motokáry")
         if ok:
@@ -457,20 +510,31 @@ class MainScreen(QDialog):
 
                 self.updateAvailable()
 
+            else:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Ujistěte se, že motokára existuje a je k dispozici")
+                msg.setInformativeText("Zkuste to znovu.")
+                msg.setWindowTitle("Motokára nenalezena.")
+                msg.exec_()
+
     def checkIfToReturn(self):
         timenow = datetime.now()
         currenttime = (timenow.hour * 60) + timenow.minute
+
         if not Login.currentlyrentedlist:
             pass
         else:
-            if Login.currentlyrentedlist[0][1] == currenttime:
-                Login.toreturnlist.append((Login.currentlyrentedlist[0][0]))
-                del Login.currentlyrentedlist[0]
+            newlist = []
+            for i in Login.currentlyrentedlist:
+                if i[1] != currenttime:
+                    newlist.append(i)
+                elif i[1] == currenttime:
+                    Login.toreturnlist.append(i[0])
+            if Login.currentlyrentedlist != newlist:
+                Login.currentlyrentedlist = newlist
                 self.updateRented()
                 self.updateToReturn()
-                self.checkIfToReturn()
-            elif Login.currentlyrentedlist[0][1] != currenttime:
-                pass
 
     def updateToReturn(self):
         if not Login.toreturnlist:
@@ -545,8 +609,7 @@ class MainScreen(QDialog):
         app.quit()
 
     def changePrice(self):
-        checkrights, ok = QInputDialog.getText(self, "Změnit cenu", "Zadejte heslo:", QLineEdit.Password)
-        if ok and checkrights == MainScreen.password:
+        if MainScreen.adminpower:
             newprice, ok = QInputDialog.getInt(self, "Změnit cenu", "Nová cena:")
             if ok:
                 conn1 = sqlite3.connect("currvalues.db")
@@ -561,14 +624,12 @@ class MainScreen(QDialog):
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
-            msg.setText("Nesprávné heslo")
-            msg.setInformativeText("Zkuste to znovu.")
-            msg.setWindowTitle("Nesprávné heslo.")
+            msg.setText("Před prováděním změn se přihlaste")
+            msg.setWindowTitle("Nedostatečná práva.")
             msg.exec_()
 
     def changeDuration(self):
-        checkrights, ok = QInputDialog.getText(self, "Změnit trvání", "Zadejte heslo:", QLineEdit.Password)
-        if ok and checkrights == MainScreen.password:
+        if MainScreen.adminpower:
             time, ok = QInputDialog.getInt(self, "Změnit trvání", "Nová doba v min:")
             if ok:
                 conn1 = sqlite3.connect("currvalues.db")
@@ -583,9 +644,8 @@ class MainScreen(QDialog):
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
-            msg.setText("Nesprávné heslo")
-            msg.setInformativeText("Zkuste to znovu.")
-            msg.setWindowTitle("Nesprávné heslo.")
+            msg.setText("Před prováděním změn se přihlaste")
+            msg.setWindowTitle("Nedostatečná práva.")
             msg.exec_()
 
     def swapCarts(self):
@@ -683,8 +743,7 @@ class MainScreen(QDialog):
                     self.updateRented()
 
     def changePassword(self):
-        checkpass, ok = QInputDialog.getText(self, "Změnit heslo", "Zadejte aktuální heslo:", QLineEdit.Password)
-        if ok and checkpass == MainScreen.password:
+        if MainScreen.adminpower:
             newpass, ok = QInputDialog.getText(self, "Změnit heslo", "Zadejte nové heslo:")
             if ok:
                 newpassconf, ok = QInputDialog.getText(self, "Změnit heslo", "Potvrďte nové heslo:")
@@ -707,11 +766,9 @@ class MainScreen(QDialog):
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
-            msg.setText("Nesprávné heslo")
-            msg.setInformativeText("Zkuste to znovu.")
-            msg.setWindowTitle("Nesprávné heslo.")
+            msg.setText("Před prováděním změn se přihlaste")
+            msg.setWindowTitle("Nedostatečná práva.")
             msg.exec_()
-
 
 # main
 app = QApplication(sys.argv)
