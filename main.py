@@ -118,7 +118,7 @@ class MainScreen(QDialog):
         MainScreen.adminpower = False
 
     def allowChange(self):
-        checkrights, ok = QInputDialog.getText(self, "Přidat motokáru", "Zadejte heslo:", QLineEdit.Password)
+        checkrights, ok = QInputDialog.getText(self, "Přihlásit se", "Zadejte heslo:", QLineEdit.Password)
         if checkrights and ok:
             MainScreen.adminpower = True
             msg = QMessageBox()
