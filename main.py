@@ -117,14 +117,20 @@ class MainScreen(QDialog):
 
         MainScreen.adminpower = False
 
-    def allowChange(self):
+        def allowChange(self):
         checkrights, ok = QInputDialog.getText(self, "Přihlásit se", "Zadejte heslo:", QLineEdit.Password)
-        if checkrights and ok:
+        if checkrights == MainScreen.password and ok:
             MainScreen.adminpower = True
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
             msg.setText("Úspěšně přihlášeno, můžete provádět změny")
             msg.setWindowTitle("Přihlášeno")
+            msg.exec_()
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Nesprávné heslo")
+            msg.setWindowTitle("Neplatné heslo, zkuste to znovu")
             msg.exec_()
 
     def logOutAdmin(self):
