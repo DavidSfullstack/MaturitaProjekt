@@ -614,9 +614,9 @@ class MainScreen(QDialog):
         logfile.close()
         app.quit()
 
-    def changePrice(self):
+       def changePrice(self):
         if MainScreen.adminpower:
-            newprice, ok = QInputDialog.getInt(self, "Změnit cenu", "Nová cena:")
+            newprice, ok = QInputDialog.getInt(self, "Změnit cenu", "Nová cena:",0 ,0)
             if ok:
                 conn1 = sqlite3.connect("currvalues.db")
                 c1 = conn1.cursor()
@@ -636,7 +636,7 @@ class MainScreen(QDialog):
 
     def changeDuration(self):
         if MainScreen.adminpower:
-            time, ok = QInputDialog.getInt(self, "Změnit trvání", "Nová doba v min:")
+            time, ok = QInputDialog.getInt(self, "Změnit trvání", "Nová doba v min:", 0, 0)
             if ok:
                 conn1 = sqlite3.connect("currvalues.db")
                 c1 = conn1.cursor()
